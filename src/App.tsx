@@ -8,11 +8,15 @@ import { getProcessedImages, type TimeMachineData } from './utils';
 const MAX_RUNTIME_MILLISECONDS = 30 * 1000; // 30 seconds in milliseconds
 const MAX_MILLISECONDS_PER_IMAGE = 150; // 150 milliseconds per image
 
+const formatSpeed = (s: number) => s.toFixed(2).replace(/(\d\.\d)0$/, '$1');
+
 function App() {
   // 1. State
   const [currentIndex, setCurrentIndex] = useState(0);
   const [calendarMonth, setCalendarMonth] = useState<Date | undefined>(undefined);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isRotated, setIsRotated] = useState(false);
@@ -46,7 +50,8 @@ function App() {
 
   // 4.2 Playback Logic
   useEffect(() => {
-    const interval = Math.min(MAX_RUNTIME_MILLISECONDS / frames.length, MAX_MILLISECONDS_PER_IMAGE);
+    const interval =
+      Math.min(MAX_RUNTIME_MILLISECONDS / frames.length, MAX_MILLISECONDS_PER_IMAGE) / speed;
 
     if (isPlaying) {
       playRef.current = window.setInterval(() => {
@@ -65,7 +70,7 @@ function App() {
     return () => {
       if (playRef.current) clearInterval(playRef.current);
     };
-  }, [isPlaying, frames.length]);
+  }, [isPlaying, frames.length, speed]);
 
   // 4.3 Smart Preloading (loads 5 images ahead of current index)
   useEffect(() => {
@@ -259,7 +264,7 @@ function App() {
                     className="text-white hover:text-gray-300 transition-colors focus:outline-none"
                     title="Replay"
                   >
-                    <span className="material-icons text-3xl">replay</span>
+                    <span className="material-symbols-outlined text-3xl">replay</span>
                   </button>
                 ) : isPlaying ? (
                   <button
@@ -268,7 +273,7 @@ function App() {
                     className="text-white hover:text-gray-300 transition-colors focus:outline-none"
                     title="Pause"
                   >
-                    <span className="material-icons text-3xl">pause</span>
+                    <span className="material-symbols-outlined text-3xl">pause</span>
                   </button>
                 ) : (
                   <button
@@ -277,19 +282,48 @@ function App() {
                     className="text-white hover:text-gray-300 transition-colors focus:outline-none"
                     title="Play"
                   >
-                    <span className="material-icons text-3xl">play_arrow</span>
+                    <span className="material-symbols-outlined text-3xl">play_arrow</span>
                   </button>
                 )}
               </div>
 
-              {/* Right: fullscreen */}
-              <div className="flex items-center gap-2">
+              {/* Right: speed + fullscreen */}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <button
+                    onClick={() => setShowSpeedMenu((prev) => !prev)}
+                    className="text-white hover:text-gray-300 transition-colors"
+                    title="Playback speed"
+                  >
+                    <span className="material-symbols-outlined text-2xl">speed</span>
+                  </button>
+                  {showSpeedMenu && (
+                    <div className="absolute bottom-full right-0 mb-2 flex flex-col items-end gap-1 bg-black/80 rounded-lg p-2">
+                      {[0.25, 0.5, 1, 1.5, 2].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => {
+                            setSpeed(s);
+                            setShowSpeedMenu(false);
+                          }}
+                          className={`text-xs px-2 py-0.5 rounded w-full text-right transition-colors ${
+                            speed === s
+                              ? 'bg-white text-black font-bold'
+                              : 'text-white hover:text-gray-300'
+                          }`}
+                        >
+                          {formatSpeed(s)}x
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={handleFullscreen}
                   className="text-white hover:text-gray-300 transition-colors"
                   title={isFullscreen || isFakeFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
                 >
-                  <span className="material-icons text-2xl">
+                  <span className="material-symbols-outlined text-2xl">
                     {isFullscreen || isFakeFullscreen ? 'fullscreen_exit' : 'fullscreen'}
                   </span>
                 </button>
