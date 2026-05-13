@@ -1,0 +1,41 @@
+@import 'tailwindcss';
+
+[data-theme='dark'] .rdp-root {
+  --rdp-accent-color: #7db97d;
+  --rdp-today-color: #7db97d;
+}
+
+/* Only apply when the browser is actually in fullscreen mode */
+:fullscreen.manual-rotate {
+  width: 100vh !important;
+  height: 100vw !important;
+  transform: translate(-50%, -50%) rotate(90deg);
+  transform-origin: center;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  max-width: none !important; /* Override your max-w-6xl */
+}
+
+/* Fallback for iOS/WebKit prefixes */
+:-webkit-full-screen.manual-rotate {
+  width: 100vh !important;
+  height: 100vw !important;
+  transform: translate(-50%, -50%) rotate(90deg);
+  top: 50%;
+  left: 50%;
+}
+
+/* Fake fullscreen for iOS — no Fullscreen API available */
+.fake-fullscreen {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 100vh !important;
+  height: 100vw !important;
+  transform: translate(-50%, -50%) rotate(90deg) !important;
+  transform-origin: center !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  z-index: 9999 !important;
+}
