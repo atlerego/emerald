@@ -223,7 +223,8 @@ function App() {
             <img
               src={currentFrame.url}
               alt="Construction frame"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain cursor-pointer"
+              onClick={() => playButtonRef.current?.click()}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-500">
