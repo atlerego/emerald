@@ -34,18 +34,26 @@ function App() {
   const playButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // 3. Derived (needed before effects)
+  function getLastDayIndex() {
+    let currentIndex = frames.length - 1;
+    const latestDat = frames[currentIndex];
+
+    for (let i = frames.length - 1; i >= 0; i--) {
+      if (frames[i].date == latestDat.date) {
+        currentIndex = i;
+      } else {
+        break;
+      }
+    }
+    return currentIndex;
+  }
+  const lastDayIndex = getLastDayIndex();
   const isAtEnd = currentIndex === frames.length - 1 && !isPlaying;
 
   // 4. Effects
   // 4.1 Load and process images on mount
   useEffect(() => {
-    getProcessedImages().then((data) => {
-      setImageData(data);
-      const todayKey = format(new Date(), 'yyyy-MM-dd');
-      if (todayKey in data.dateIndex) {
-        setCurrentIndex(data.dateIndex[todayKey]);
-      }
-    });
+    getProcessedImages().then((data) => setImageData(data));
   }, []);
 
   // 4.2 Playback Logic
@@ -144,6 +152,12 @@ function App() {
     if (isPlaying) {
       hideTimerRef.current = window.setTimeout(() => setShowControls(false), 2500);
     }
+  }
+
+  function goToLatest() {
+    setCurrentIndex(lastDayIndex);
+    setCalendarMonth(frames[lastDayIndex].date ? new Date(frames[lastDayIndex].date) : undefined);
+    setIsPlaying(false);
   }
 
   function handleDateSelect(date: Date | undefined) {
@@ -251,7 +265,7 @@ function App() {
 
             {/* Bottom row: play + right-side buttons */}
             <div className="flex items-center justify-between">
-              {/* Left: play/pause/replay */}
+              {/* Left: play/pause/replay + To latest day */}
               <div className="flex items-center gap-3">
                 {isAtEnd ? (
                   <button
@@ -285,6 +299,13 @@ function App() {
                     <span className="material-symbols-outlined text-3xl">play_arrow</span>
                   </button>
                 )}
+                <button
+                  onClick={goToLatest}
+                  className="text-white hover:text-gray-300 transition-colors focus:outline-none"
+                  title="To today"
+                >
+                  <span className="material-symbols-outlined text-3xl">today</span>
+                </button>
               </div>
 
               {/* Right: speed + fullscreen */}
